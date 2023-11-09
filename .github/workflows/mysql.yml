@@ -1,0 +1,21 @@
+name: MySQL Service
+
+on:
+  push:
+    branches:
+      - main
+#      - develop
+  pull_request:
+    branches:
+      - main
+#      - develop
+
+jobs:
+  mysql-job:
+    runs-on: ubuntu-latest
+
+    services:
+      mysql:
+        image: mysql
+        ports:
+          - 3306:3306
