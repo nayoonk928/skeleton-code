@@ -20,6 +20,26 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
+      - name: Java 17 설치
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: make application-database.yml
+        run: |
+          cd ./src/main/resources
+          touch ./application-database.yml
+          echo "${{ secrets.DATABASE }}" >> ./application-database.yml
+        shell: bash
+
+      - name: make application-redis.yml
+        run: |
+          cd ./src/main/resources
+          touch ./application-redis.yml
+          echo "${{ secrets.REDIS }}" >> ./application-redis.yml
+        shell: bash
+
       - name: Gradle 캐싱
         uses: actions/cache@v3
         with:
@@ -29,12 +49,6 @@ jobs:
           key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
           restore-keys: |
             ${{ runner.os }}-gradle
-
-      - name: Java 17 설치
-        uses: actions/setup-java@v3
-        with:
-          java-version: '17'
-          distribution: 'temurin'
 
       - name: Gradle Build 권한 부여
         run: chmod +x gradlew
@@ -53,6 +67,18 @@ jobs:
 
       - name: Docker Hub 이미지 푸시
         run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/${{ secrets.PROJECT_NAME }}
+
+      - name: Docker compose up
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ubuntu
+          key: ${{ secrets.KEY }}
+          script: |
+            sudo docker rm $(sudo docker ps -a)
+            sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/${{ secrets.PROJECT_NAME }}
+            docker-compose up -d
+            sudo docker image prune -f
 
   # JUnit 테스트
   test:
@@ -79,7 +105,7 @@ jobs:
           distribution: 'temurin'
 
       - name: Gradle Build 권한 부여
-        run: chmod +x gradlew
+        run: chmod +x gradlew -x test
 
       - name: 테스트 수행
         run: ./gradlew test
@@ -101,3 +127,5 @@ jobs:
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_URL }}
         uses: Ilshidur/action-discord@0.3.2
+        with:
+          args: '테스트가 실패했습니다.'
