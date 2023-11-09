@@ -111,8 +111,4 @@ jobs:
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_URL }}
         uses: Ilshidur/action-discord@0.3.2
-        with:
-          color: "#6df6ea"
-          embeds:
-            status: ${{ job.status }}
         if: failure()
