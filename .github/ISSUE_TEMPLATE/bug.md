@@ -1,3 +1,12 @@
+---
+name: bug
+about: bug template
+title: ''
+labels: bug
+assignees: ''
+
+---
+
 ### ❗버그 설명
 설명을 작성하세요.
 
