@@ -7,7 +7,7 @@ on:
     branches: [ "main" ]
 
 permissions:
-  contents: write
+  contents: write-all
 
 jobs:
   # Spring Boot 애플리케이션을 빌드하여 도커허브에 푸시하는 과정
@@ -17,8 +17,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      # Gradle 캐싱
-      - name: Gradle Caching
+      - name: Gradle 캐싱
         uses: actions/cache@v3
         with:
           path: |
@@ -28,34 +27,28 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-gradle
 
-      # Java 17 설치
-      - name: Set up JDK 17
+      - name: Java 17 설치
         uses: actions/setup-java@v3
         with:
           java-version: '17'
           distribution: 'temurin'
 
-      # Gradle Build를 위한 권한 부여
-      - name: Grant execute permission for gradlew
+      - name: Gradle Build 권한 부여
         run: chmod +x gradlew
 
-      # Gradle Build (test 제외)
-      - name: Build with Gradle
+      - name: Gradle Build (test 제외)
         run: ./gradlew clean build --exclude-task test
 
-      # DockerHub 로그인
-      - name: Docker login
+      - name: DockerHub 로그인
         uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_PASSWORD }}
 
-      # Docker 이미지 빌드
-      - name: Docker image build
+      - name: Docker 이미지 빌드
         run: docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/${{ secrets.PROJECT_NAME }} .
 
-      # Docker Hub 이미지 푸시
-      - name: DockerHub push
+      - name: Docker Hub 이미지 푸시
         run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/${{ secrets.PROJECT_NAME }}
 
   # JUnit 테스트
@@ -66,8 +59,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      # Gradle 캐싱
-      - name: Gradle Caching
+      - name: Gradle 캐싱
         uses: actions/cache@v3
         with:
           path: |
@@ -77,37 +69,31 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-gradle
 
-      # Java 17 설치
-      - name: Set up JDK 17
+      - name: Java 17 설치
         uses: actions/setup-java@v3
         with:
           java-version: '17'
           distribution: 'temurin'
 
-      # Gradle Build를 위한 권한 부여
-      - name: Grant execute permission for gradlew
+      - name: Gradle Build 권한 부여
         run: chmod +x gradlew
 
-      # Gradle Test
-      - name: Run tests with Gradle
+      - name: 테스트 수행
         run: ./gradlew test
 
-      # 테스트 결과 등록
       - name: 테스트 결과를 PR에 코멘트로 등록
         uses: EnricoMi/publish-unit-test-result-action@v2
         if: always()
         with:
           files: '**/build/test-results/test/TEST-*.xml'
 
-      # 테스트 실패 시, 코드 라인에 코멘트 등록
       - name: 테스트 실패 시, 실패한 코드 라인에 Check 코멘트를 등록
         uses: mikepenz/action-junit-report@v3
         if: always()
         with:
           report_paths: '**/build/test-results/test/TEST-*.xml'
 
-      # build 실패 시 디스코드로 알림
-      - name: Discord notification
+      - name: 디스코드 알림
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_URL }}
         uses: Ilshidur/action-discord@0.3.2
