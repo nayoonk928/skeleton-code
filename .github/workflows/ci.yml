@@ -68,17 +68,24 @@ jobs:
       - name: Docker Hub 이미지 푸시
         run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/${{ secrets.PROJECT_NAME }}
 
-      - name: Docker compose up
-        uses: appleboy/ssh-action@master
+      - name: EC2 인스턴스 접속 및 애플리케이션 실행
+        uses: appleboy/ssh-action@v0.1.6
         with:
           host: ${{ secrets.HOST }}
-          username: ubuntu
+          username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.KEY }}
           script: |
-            sudo docker rm $(sudo docker ps -a)
+            sudo docker kill ${{ secrets.PROJECT_NAME }}
+            sudo docker rm -f ${{ secrets.PROJECT_NAME }}
+            sudo docker rmi ${{ secrets.DOCKERHUB_USERNAME }}/${{ secrets.PROJECT_NAME }}
             sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/${{ secrets.PROJECT_NAME }}
-            docker-compose up -d
-            sudo docker image prune -f
+            
+            sudo docker run -p ${{ secrets.PORT }}:${{ secrets.PORT }} \
+            --name ${{ secrets.PROJECT_NAME }} \
+            -e SPRING_DATASOURCE_URL=${{ secrets.DB_URL }} \
+            -e SPRING_DATASOURCE_USERNAME=${{ secrets.SPRING_DATASOURCE_USERNAME }} \
+            -e SPRING_DATASOURCE_PASSWORD=${{ secrets.MYSQL_ROOT_PASSWORD }} \
+            -d ${{ secrets.DOCKERHUB_USERNAME }}/${{ secrets.PROJECT_NAME }}
 
   # JUnit 테스트
   test:
@@ -105,7 +112,7 @@ jobs:
           distribution: 'temurin'
 
       - name: Gradle Build 권한 부여
-        run: chmod +x gradlew -x test
+        run: chmod +x gradlew
 
       - name: 테스트 수행
         run: ./gradlew build
