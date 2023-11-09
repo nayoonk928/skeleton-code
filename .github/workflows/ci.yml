@@ -107,12 +107,12 @@ jobs:
           token: ${{ github.token }}
 
       # build 실패 시 디스코드로 알림
-      - name: build 실패 시 디스코드로 알립니다
+      - name: Discord notification
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_URL }}
         uses: Ilshidur/action-discord@0.3.2
         with:
-          status: ${{ job.status }}
-          author_name: 백엔드 빌드 실패 알림
-          fields: repo, message, commit, author, action, eventName, ref, workflow, job, took
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          color: "#6df6ea"
+          embeds:
+            status: ${{ job.status }}
         if: failure()
