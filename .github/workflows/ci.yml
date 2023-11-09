@@ -110,4 +110,5 @@ jobs:
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_URL }}
         uses: Ilshidur/action-discord@0.3.2
-        args: {{ WORKFLOW_RUN.conclusion }}
+        with:
+          args: {{ WORKFLOW_RUN.conclusion }}
