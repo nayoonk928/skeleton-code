@@ -2,9 +2,9 @@ name: Spring Boot Tests
 
 on:
   push:
-    branches: [main, develop]
+    branches: [ "main", "develop" ]
   pull_request:
-    branches: [main, develop]
+    branches: [ "main", "develop" ]
 
 permissions:
   contents: read
@@ -49,3 +49,11 @@ jobs:
         if: always()
         with:
           files: '**/build/test-results/test/TEST-*.xml'
+
+      # 테스트 실패 시, 코드 라인에 코멘트 등록
+      - name: 테스트 실패 시, 실패한 코드 라인에 Check 코멘트를 등록
+        uses: mikepenz/action-junit-report@v3
+        if: always()
+        with:
+          report_paths: '**/build/test-results/test/TEST-*.xml'
+          token: ${{ github.token }}
