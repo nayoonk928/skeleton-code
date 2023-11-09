@@ -2,9 +2,13 @@ name: Spring Boot & Gradle CI/CD & Test
 
 on:
   push:
-    branches: [ "main" ]
+    branches:
+      - main
+      - develop
   pull_request:
-    branches: [ "main" ]
+    branches:
+      - main
+      - develop
 
 permissions: write-all
 
@@ -93,6 +97,7 @@ jobs:
           report_paths: '**/build/test-results/test/TEST-*.xml'
 
       - name: 디스코드 알림
+        if: ${{ failure() }}
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_URL }}
         uses: Ilshidur/action-discord@0.3.2
