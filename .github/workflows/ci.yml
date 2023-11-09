@@ -117,5 +117,3 @@ jobs:
                 "inline": true
               }
             ]
-          footer: 'CI/CD 알림'  # 알림의 바닥글
-          footer_icon: 'https://example.com/icon.png'
