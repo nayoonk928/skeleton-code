@@ -1,4 +1,4 @@
-name: Docker 이미지 빌드 및 푸시
+name: CI 및 테스트
 
 on:
   push:
@@ -41,7 +41,7 @@ jobs:
 
       # Docker 이미지 빌드
       - name: Docker image build
-        run: docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/${{ secrets.PROJECT_NAME }} :skeleton-code
+        run: docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/${{ secrets.PROJECT_NAME }} .
 
       # Docker Hub 이미지 푸시
       - name: DockerHub push
