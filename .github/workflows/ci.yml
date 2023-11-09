@@ -1,4 +1,4 @@
-name: CI 및 테스트
+name: Spring Boot & Gradle CI/CD
 
 on:
   push:
@@ -16,6 +16,17 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+
+      # Gradle 캐싱
+      - name: Gradle Caching
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle
 
       # Java 17 설치
       - name: Set up JDK 17
@@ -46,10 +57,3 @@ jobs:
       # Docker Hub 이미지 푸시
       - name: DockerHub push
         run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/${{ secrets.PROJECT_NAME }}
-
-      # 테스트 결과 등록
-      - name: 테스트 결과를 PR에 코멘트로 등록
-        uses: EnricoMi/publish-unit-test-result-action@v2
-        if: always()
-        with:
-          files: '**/build/test-results/test/TEST-*.xml'
