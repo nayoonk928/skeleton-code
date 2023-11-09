@@ -4,11 +4,11 @@ on:
   push:
     branches:
       - main
-      - develop
+#      - develop
   pull_request:
     branches:
       - main
-      - develop
+#      - develop
 
 permissions: write-all
 
@@ -101,3 +101,21 @@ jobs:
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_URL }}
         uses: Ilshidur/action-discord@0.3.2
+        with:
+          title: '테스트 실패'
+          description: '테스트가 실패했습니다. 자세한 내용은 CI/CD 작업을 확인하세요.'
+          fields: |
+            [
+              {
+                "name": "프로젝트",
+                "value": "${{ secrets.PROJECT_NAME }}",
+                "inline": true
+              },
+              {
+                "name": "브랜치",
+                "value": "${{ github.head_ref }}",
+                "inline": true
+              }
+            ]
+          footer: 'CI/CD 알림'  # 알림의 바닥글
+          footer_icon: 'https://example.com/icon.png'
