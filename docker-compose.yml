@@ -1,0 +1,51 @@
+version: '3.7'
+
+services:
+  database:
+    container_name: mysql_db
+    image: mysql
+    restart: always
+    environment:
+      MYSQL_DATABASE: skeleton_db
+      MYSQL_ROOT_HOST: '%'
+      MYSQL_ROOT_PASSWORD: ${MYSQL_PASSWORD}
+      TZ: 'Asia/Seoul'
+    ports:
+      - "3306:3306"
+    volumes:
+      - "mysql_data:/var/lib/mysql"
+    networks:
+      - skeleton_network
+
+  cache:
+    container_name: redis
+    image: redis
+    restart: always
+    ports:
+      - "6379:6379"
+    networks:
+      - skeleton_network
+
+  application:
+    container_name: skeleton-code
+    restart: on-failure
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://database:3306/skeleton_db?useSSL=false&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_USERNAME: "root"
+      SPRING_DATASOURCE_PASSWORD: ${MYSQL_PASSWORD}
+    depends_on:
+      - database
+      - cache
+    networks:
+      - skeleton_network
+
+networks:
+  skeleton_network:
+
+volumes:
+  mysql_data:
