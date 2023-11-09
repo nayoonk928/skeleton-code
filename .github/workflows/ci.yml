@@ -104,7 +104,6 @@ jobs:
         if: always()
         with:
           report_paths: '**/build/test-results/test/TEST-*.xml'
-          token: ${{ github.token }}
 
       # build 실패 시 디스코드로 알림
       - name: Discord notification
